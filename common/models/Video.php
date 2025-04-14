@@ -3,6 +3,8 @@
 namespace common\models;
 
 use Yii;
+use yii\helpers\FileHelper;
+use yii\web\UploadedFile;
 
 /**
  * This is the model class for table "{{%video}}".
@@ -23,6 +25,10 @@ use Yii;
 class Video extends \yii\db\ActiveRecord
 {
 
+    /**
+     * @var \yii\web\UpLoadedFile
+     */
+    public $video;
 
     /**
      * {@inheritdoc}
@@ -46,6 +52,7 @@ class Video extends \yii\db\ActiveRecord
             [['title', 'tags', 'video_name'], 'string', 'max' => 512],
             [['video_id'], 'unique'],
             [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['created_by' => 'id']],
+            [['videoFile'], 'file', 'extensions' => 'mp4, mov, avi', 'maxSize' => 1024 * 1024 * 100],
         ];
     }
 
@@ -87,4 +94,47 @@ class Video extends \yii\db\ActiveRecord
         return new \common\models\query\VideoQuery(get_called_class());
     }
 
+    public function save($runValidation = true, $attributeNames = null)
+    {
+        $isInsert = $this->isNewRecord;
+        
+        if ($isInsert) {
+            // Gera um ID único para o vídeo
+            $this->video_id = Yii::$app->security->generateRandomString(8);
+            
+            // Define o título baseado no nome do arquivo (se existir)
+            if ($this->videoFile instanceof UploadedFile) {
+                $this->title = $this->videoFile->name;
+                $this->video_name = $this->videoFile->name;
+            }
+        }
+        
+        // Salva o modelo no banco de dados
+        if (!parent::save($runValidation, $attributeNames)) {
+            return false;
+        }
+        
+        // Se for uma inserção e houver um arquivo, salva o arquivo
+        if ($isInsert && $this->videoFile instanceof UploadedFile) {
+            $videoPath = $this->getVideoPath();
+            
+            // Cria o diretório se não existir
+            if (!is_dir(dirname($videoPath))) {
+                FileHelper::createDirectory(dirname($videoPath));
+            }
+            
+            // Salva o arquivo físico
+            if (!$this->videoFile->saveAs($videoPath)) {
+                $this->addError('videoFile', 'Falha ao salvar o arquivo no servidor.');
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    protected function getVideoPath()
+    {
+        return Yii::getAlias('@frontend/web/storage/videos/' . $this->video_id . '.' . $this->videoFile->extension);
+    }
 }

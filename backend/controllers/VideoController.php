@@ -2,7 +2,9 @@
 
 namespace backend\controllers;
 
+use app\widgets\XDebug;
 use common\models\Video;
+use Yii;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -79,19 +81,10 @@ class VideoController extends Controller
     public function actionCreate()
     {
         $model = new Video();
-        $file = UploadedFile::getInstanceByName('video');
+        $model->video = UploadedFile::getInstanceByName('video');
 
-        echo '<prev>';
-            var_dump($file);
-        echo '</prev>';
-        exit;
-
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'video_id' => $model->video_id]);
-            }
-        } else {
-            $model->loadDefaultValues();
+        if (Yii::$app->request->isPost && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->video_id]);
         }
 
         return $this->render('create', [
