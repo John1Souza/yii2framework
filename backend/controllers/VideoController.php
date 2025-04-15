@@ -90,7 +90,7 @@ class VideoController extends Controller
         $model->video = UploadedFile::getInstanceByName('video');
 
         if (Yii::$app->request->isPost && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->video_id]);
+            return $this->redirect(['update', 'video_id' => $model->video_id]);
         }
 
         return $this->render('create', [
@@ -105,9 +105,9 @@ class VideoController extends Controller
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate($video_id)
     {
-        $model = $this->findModel($id);
+        $model = $this->findModel($video_id);
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
             return $this->redirect(['view', 'video_id' => $model->video_id]);

@@ -44,7 +44,7 @@ return [
             'showScriptName' => false,
             'rules' => [
                 'video/create' => 'video/create',
-                'video/update/<id>' => 'video/update'
+                'video/update/<video_id>' => 'video/update'
             ],
         ],
         'assetManager' => [
