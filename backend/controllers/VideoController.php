@@ -58,7 +58,7 @@ class VideoController extends Controller
         return $this->render('index', [
             'dataProvider' => $dataProvider,
         ]);
-    }
+    } 
 
     /**
      * Displays a single Video model.
@@ -66,10 +66,16 @@ class VideoController extends Controller
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($video_id)
+    public function actionView($id)
     {
+        \Yii::debug('Viewing video_id: ' . $id, 'video_upload');
+        $model = Video::findOne(['video_id' => $id]);
+        if (!$model) {
+            \Yii::error('Video not found for video_id: ' . $id, 'video_upload');
+            throw new \yii\web\NotFoundHttpException('Video not found.');
+        }
         return $this->render('view', [
-            'model' => $this->findModel($video_id),
+            'model' => $this->findModel($id),
         ]);
     }
 
@@ -99,9 +105,9 @@ class VideoController extends Controller
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($video_id)
+    public function actionUpdate($id)
     {
-        $model = $this->findModel($video_id);
+        $model = $this->findModel($id);
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
             return $this->redirect(['view', 'video_id' => $model->video_id]);

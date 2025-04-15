@@ -43,7 +43,8 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
-                'video/create' => 'video/create'
+                'video/create' => 'video/create',
+                'video/update/<id>' => 'video/update'
             ],
         ],
         'assetManager' => [
